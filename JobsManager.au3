@@ -3,7 +3,7 @@
 
  AutoIt Version : 3.3.14.5
  Programme Version :
- Auteur:         OUTIN Yann
+ Auteur:         Yann83
  Description du programme :
 	<....>
 
