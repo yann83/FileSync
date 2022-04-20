@@ -130,14 +130,18 @@ While 1
                 If $Ret <> "" Then
                         $sLectureGuiDest = GUICtrlRead($InputTarget)
                         If $Ret <> "" Then
-                            IniWrite($sFichierIni,$sLectureGuiName,"source",$sLectureGuiSource)
-                            IniWrite($sFichierIni,$sLectureGuiName,"target",$sLectureGuiDest)
-                            $Ret = _LectureGuiEncryption(GUICtrlRead($Encrpyt))
-                            IniWrite($sFichierIni,$sLectureGuiName,"encryption",$Ret)
-                            GUICtrlSetState($InputJobName,$GUI_ENABLE)
-                            GUICtrlSetStyle($InputJobName, $GUI_SS_DEFAULT_INPUT)
-                            _PopulatecomboBox($sFichierIni)
-                            MsgBox(64,"Done","Entry "&$sLectureGuiName&" added or updated")
+                            If Not _CheckIfExist($sLectureGuiName,$sFichierIni) Then
+                                IniWrite($sFichierIni,$sLectureGuiName,"source",$sLectureGuiSource)
+                                IniWrite($sFichierIni,$sLectureGuiName,"target",$sLectureGuiDest)
+                                $Ret = _LectureGuiEncryption(GUICtrlRead($Encrpyt))
+                                IniWrite($sFichierIni,$sLectureGuiName,"encryption",$Ret)
+                                GUICtrlSetState($InputJobName,$GUI_ENABLE)
+                                GUICtrlSetStyle($InputJobName, $GUI_SS_DEFAULT_INPUT)
+                                _PopulatecomboBox($sFichierIni)
+                                MsgBox(64,"Done","Entry "&$sLectureGuiName&" added or updated")
+                            Else
+                                MsgBox(16,"warning","Job already exist")
+                            EndIf
                         Else
                             MsgBox(16,"warning","No Target")
                         EndIf
@@ -149,6 +153,15 @@ While 1
             EndIf
     EndSwitch
 WEnd
+
+Func _CheckIfExist($f_sJobName,$f_sFichierIni)
+    Local $f_aGetJobsList = IniReadSectionNames($f_sFichierIni)
+    If @error Then Return False
+    For $i = 1 To $f_aGetJobsList[0]
+        If $f_aGetJobsList[$i] = $f_sJobName Then Return True
+    Next
+    Return False
+EndFunc
 
 Func _PopulatecomboBox($f_sFichierIni)
     _GUICtrlComboBox_ResetContent($JobsList)

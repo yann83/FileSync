@@ -88,10 +88,15 @@ If $CmdLine[0] > 0 Then
 
         Case "-addjob"
             If $CmdLine[0] > 4 Then
-                IniWrite($sFichierIni,$CmdLine[2],"source",$CmdLine[3])
-                IniWrite($sFichierIni,$CmdLine[2],"target",$CmdLine[4])
-                IniWrite($sFichierIni,$CmdLine[2],"encryption",$CmdLine[5])
-                Exit
+                If Not _CheckIfExist($CmdLine[2],$sFichierIni) Then
+                    IniWrite($sFichierIni,$CmdLine[2],"source",_ReformatPath($CmdLine[3]))
+                    IniWrite($sFichierIni,$CmdLine[2],"target",_ReformatPath($CmdLine[4]))
+                    IniWrite($sFichierIni,$CmdLine[2],"encryption",_CheckBool($CmdLine[5]))
+                    Exit
+                Else
+                   ConsoleWrite("Job already exist."&@CRLF)
+                    Exit
+                EndIf
             Else
                 ConsoleWrite("Invalid parameters."&@CRLF)
                 Exit
@@ -129,6 +134,7 @@ If $CmdLine[0] > 0 Then
             ConsoleWrite(". <path to save folder> add a \ at the end"&@CRLF)
             ConsoleWrite(". <encryption> false or true"&@CRLF)
             ConsoleWrite(". ex : -addjob MyJob C:\myfolder\ E:\mysavefolder\ true"&@CRLF)
+            ConsoleWrite(". ex : -addjob MyJob C:\myfolder\myfile.txt E:\mysavefile\ false"&@CRLF)
             ConsoleWrite("Delete a job [-deletejob], ex : -deletejob MyJob"&@CRLF)
             ConsoleWrite("Run the jobs manager [-runmanager]"&@CRLF)
             ConsoleWrite("Run all jobs [-runall]"&@CRLF)
@@ -143,6 +149,30 @@ If $CmdLine[0] > 0 Then
             Exit
     EndSwitch
 EndIf
+
+Func _CheckIfExist($f_sJobName,$f_sFichierIni)
+    Local $f_aGetJobsList = IniReadSectionNames($f_sFichierIni)
+    If @error Then Return False
+    For $i = 1 To $f_aGetJobsList[0]
+        If $f_aGetJobsList[$i] = $f_sJobName Then Return True
+    Next
+    Return False
+EndFunc
+
+Func _CheckBool($f_sData)
+    If StringLower($f_sData) = "true" Then Return "true"
+    Return "false"
+EndFunc
+
+Func _ReformatPath($f_sData)
+    Local $f_bIsFolder = True
+    Local $f_iSize = DirGetSize($f_sSource, 2)
+    If @error Then $f_bIsFolder = False
+    If $f_bIsFolder Then
+        If StringRight($f_sData,1) <> "\" Then $f_sData = $f_sData & "\"
+    EndIf
+    Return($f_sData)
+EndFunc
 
 Func _SyncFile($f_aJob)
     Local $f_aProcessJob
